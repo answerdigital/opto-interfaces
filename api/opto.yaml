@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Opto Streaming Output API
+  version: 1.0.1
+  description: Receives UEC patient presentations from the Opto streaming application and returns the MRN for the patient.
+
+paths:
+  /api/v1/presentation:
+    post:
+      summary: Record an UEC patient presentation
+      operationId: createPresentation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              no_spine:
+                summary: Patient with no PDS match
+                externalValue: ./examples/no_nhs_no_cpis_no_nraf_sample.json
+              spine_cpis_nraf:
+                summary: PDS matched patient with CPIS & RA flags
+                externalValue: ./examples/ok_nhs_ok_cpis_ok_nraf_sample.json
+              spine:
+                summary: PDS matched patient with no flags
+                externalValue: ./examples/ok_nhs_no_cpis_no_nraf_sample.json
+              spine_cpis:
+                summary: PDS matched patient with CPIS flags
+                externalValue: ./examples/ok_nhs_ok_cpis_no_nraf_sample.json
+              spine_ra:
+                summary: PDS matched patient with RA flags
+                externalValue: ./examples/ok_nhs_no_cpis_ok_nraf_sample.json
+      responses:
+        '200':
+          description: Presentation recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessOutcome'
+              examples:
+                success:
+                  summary: Patient registered and presentation recorded
+                  value:
+                    success: true
+                    mrn: R9423847
+
+        '400':
+          description: >
+            Malformed request. The body is not valid JSON or the Content-Type
+            header is not application/json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutcome'
+              examples:
+                invalid_json:
+                  summary: Body is not parseable JSON
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_JSON
+                      message: Request body could not be parsed as JSON
+
+        '409':
+          description: >
+            A presentation with the same user._id and routing has already been
+            processed. Duplicate submissions are rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutcome'
+              examples:
+                duplicate:
+                  summary: Presentation already received
+                  value:
+                    success: false
+                    error:
+                      code: DUPLICATE_PRESENTATION
+                      message: Presentation {id} with has already been recorded for this routing
+
+        '422':
+          description: >
+            Payload is well-formed JSON but fails business validation.
+            The error code identifies the specific rule that was violated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutcome'
+              examples:
+                missing_field:
+                  summary: Required top-level field absent
+                  value:
+                    success: false
+                    error:
+                      code: MISSING_REQUIRED_FIELD
+                      message: Required field {field} is not present
+                invalid_nhs_number:
+                  summary: NHS number fails Modulus 11 check
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_NHS_NUMBER
+                      message: NHS number {nhs number} does not pass the Modulus 11 check
+                invalid_nhs_number_format:
+                  summary: NHS number is in incorrect format
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_NHS_NUMBER
+                      message: NHS number {nhs number} is not in the correct format
+                invalid_hospital:
+                  summary: Hospital identifier not recognised
+                  value:
+                    success: false
+                    error:
+                      code: UNKNOWN_HOSPITAL
+                      message: Hospital {identifier} is not configured
+                invalid_dob:
+                  summary: Date of birth is in the future
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_DATE_OF_BIRTH
+                      message: Date of birth is in the future
+                invalid_dob_format:
+                  summary: Date of birth is invalid format or in invalid date
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_DATE_OF_BIRTH_FORMAT
+                      message: Date of birth is in the future
+                invalid_postcode:
+                  summary: Date of birth is in the future
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_POSTCODE
+                      message: Postcode is in invalid format
+                invalid_name:
+                  summary: Patient name is invalid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_PATIENT_NAME
+                      message: Patient name is invalid
+                invalid_ec_name:
+                  summary: Emergency contact name is invalid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_EC_NAME
+                      message: Emergency contact name is invalid
+                invalid_enum:
+                  summary: Provided value does not match expected values
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ENUM
+                      message: Provided value in {field} does not match expected values
+                invalid_allergy:
+                  summary: Allergy is invalid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ALLERGY
+                      message: Allergy is invalid
+                invalid_file:
+                  summary: Attached file is invalid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_FILE
+                      message: The file embedded in the request is invalid
+                invalid_file_format:
+                  summary: Attached file is not in expected format
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_FILE
+                      message: The file embedded in the request is not in expected format
+                invalid_condition:
+                  summary: Presenting complaint is not valid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_PRESENTING_COMPLAINT
+                      message: Presenting complaint is not valid
+                invalid_phone:
+                  summary: Patient phone number is not valid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_PHONE
+                      message: Patient phone number is not valid
+                invalid_address:
+                  summary: Patient address is not valid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ADDRESS
+                      message: Patient address is not valid
+                invalid_routing:
+                  summary: Routing is not valid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ROUTING
+                      message: Routing is not valid
+                invalid_id:
+                  summary: User ID is not valid
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ID
+                      message: Routing is not valid
+
+        '502':
+          description: >
+            An upstream dependency returned an unexpected error.
+            The error code identifies which system failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutcome'
+              examples:
+                epr_hl7_failure:
+                  summary: EPR HL7 interface rejected the ADT message
+                  value:
+                    success: false
+                    error:
+                      code: EPR_HL7_ERROR
+                      message: EPR message interface returned error {error}
+                rpa_failure:
+                  summary: EPR integration raised an error
+                  value:
+                    success: false
+                    error:
+                      code: RPA_ERROR
+                      message: EPR integration returned error {error}
+                filestore_error: 
+                  summary: Error persisting document to filestore
+                  value:
+                    success: false
+                    error:
+                      code: FILESTORE_ERROR
+                      message: Filestore returned error {error}
+
+        '500':
+          description: Unexpected internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutcome'
+              examples:
+                internal_error:
+                  summary: Unhandled exception
+                  value:
+                    success: false
+                    error:
+                      code: INTERNAL_ERROR
+                      message: An unexpected error occurred
+
+components:
+  schemas:
+
+    # ── Outcome responses ─────────────────────────────────────────────────────
+
+    SuccessOutcome:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        mrn:
+          type: string
+          description: Medical Record Number for the patient the presentation has been recorded against
+          example: R9423847
+
+    ErrorOutcome:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              description: Human-readable description of the error
+              example: 'user._id is required'
