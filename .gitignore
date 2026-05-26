@@ -12,7 +12,43 @@ _site/
 
 # Specific ignore for GitHub Pages
 # GitHub Pages will always use its own deployed version of pages-gem
-# This means GitHub Pages will NOT use your Gemfile.lock and therefore it is
+# This means GitHub Pages will NOT use your Gemfile.lock
+
+# Private key files
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+*.jks
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+id_ed25519_sk
+id_ecdsa_sk
+
+# Allow public key files
+!*.pub
+!*.pub.pem and therefore it is
 # counterproductive to check this file into the repository.
 # Details at https://github.com/github/pages-gem/issues/768
 Gemfile.lock
+
+# Private key files
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+*.jks
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+id_ed25519_sk
+id_ecdsa_sk
+
+# Allow public key files
+!*.pub
+!*.pub.pem
