@@ -165,3 +165,108 @@ paths:
             text/html:
               schema:
                 type: string
+  /store/presentation:
+    post:
+      summary: Store presentation document
+      operationId: storePresentation
+      description: >
+        Accepts a completed Opto patient presentation document and stores it
+        against the identified patient. Called by the Opto assessment system
+        once the patient has finished answering questions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - organisationId
+                - documentReference
+              properties:
+                organisationId:
+                  type: string
+                  description: Trust identifier, matching the value used in the launch request.
+                  example: LINCS
+                nhsNumber:
+                  type: string
+                  description: NHS number (10 digits, no spaces). Optional; omitted when the patient has no verified NHS number. MRN must be present if NHS number is not provided
+                  example: "9000000009"
+                mrn:
+                  type: string
+                  description: Medical Record Number assigned by the Trust. Primary patient identifier when NHS number is absent. MRN must be present if NHS number is not provided
+                  example: "U34512345"
+                familyName:
+                  type: string
+                  description: Patient family name
+                  example: "Jones"
+                givenName:
+                  type: string
+                  description: Patient given name(s), space-delimited
+                  example: "John Steven"
+                dob:
+                  type: date
+                  description: Patient date of birth
+                  example: "2020-01-03"
+                postcode:
+                  type: string
+                  description: Patient postcode if available
+                  example: "SY21 9EU"
+                documentType:
+                  type: string
+                  description: MIME type of the streaming document
+                  example: "application/pdf"
+                documentReference:
+                  type: string
+                  description: >
+                    Unique reference for this document which the application can use for retrieval. 
+                    Comprises the Opto streaming reference + Opto routing department code.
+                  example: 69fe16155382092526cce20fED
+      responses:
+        '201':
+          description: Presentation stored successfully.
+        '400':
+          description: Malformed request body or missing required fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: Organisation is not recognised.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: Document with this ID already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '422':
+          description: Request parsed successfully but failed validation — for example, the NHS number fails the Modulus 11 check.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Unexpected internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
