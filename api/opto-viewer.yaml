@@ -16,7 +16,7 @@ paths:
         Accepts an in-context launch request from TPP SystmOne. The plaintext
         `organisationId`, `applicationId`, and `keyId` parameters identify
         the correct AES-128 decryption key and IV. All remaining parameters
-        carry AES-128 encrypted, base64url-encoded values. The server decrypts
+        carry AES-128 encrypted, base64 url-encoded values. The server decrypts
         them, validates the timestamp for replay prevention, validates the NHS
         number where present, matches the patient to a stored streaming output
         document, and renders the Viewer.
@@ -50,45 +50,38 @@ paths:
           example: k1
         - name: nhsNumber
           in: query
-          required: false
+          required: true
           description: >
-            AES-128 encrypted, base64url-encoded NHS number (10 digits, no spaces).
-            Optional; not present when the patient has no verified NHS number.
+            AES-128 encrypted, base64 url-encoded NHS number (10 digits, no spaces).
+            Required for launch from SystmOne.
           schema:
             type: string
         - name: mrn
           in: query
-          required: true
+          required: false
           description: >
-            AES-128 encrypted, base64url-encoded Medical Record Number assigned
-            by the Trust. Used as the primary patient identifier when no NHS
-            number is present.
+            AES-128 encrypted, base64 url-encoded Medical Record Number assigned
+            by the Trust. As MRN isn't reliably stored by SystmOne this is not used to launch, only for audit.
           schema:
             type: string
-        - name: patientSurname
+        - name: familyName
           in: query
           required: true
           description: AES-128 encrypted, base64url-encoded patient surname.
           schema:
             type: string
-        - name: dateOfBirth
+        - name: dob
           in: query
           required: true
           description: >
-            AES-128 encrypted, base64url-encoded patient date of birth
+            AES-128 encrypted, base64 url-encoded patient date of birth
             (ISO 8601 YYYY-MM-DD).
           schema:
             type: string
         - name: postcode
           in: query
           required: true
-          description: AES-128 encrypted, base64url-encoded patient postcode.
-          schema:
-            type: string
-        - name: gender
-          in: query
-          required: true
-          description: AES-128 encrypted, base64url-encoded patient gender.
+          description: AES-128 encrypted, base64 url-encoded patient postcode.
           schema:
             type: string
         - name: utcTimestamp
