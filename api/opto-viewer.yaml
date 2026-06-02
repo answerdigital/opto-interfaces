@@ -158,6 +158,155 @@ paths:
             text/html:
               schema:
                 type: string
+  /launch/careflow:
+    get:
+      summary: CareFlow in-context launch
+      operationId: launchFromCareFlow
+      description: >
+        Accepts an in-context launch request from System C CareFlow. The plaintext
+        `organisationId`, `applicationId`, and `keyId` parameters identify
+        the correct AES-128 decryption key and IV. All remaining parameters
+        carry AES-128 encrypted, base64 url-encoded values. The server decrypts
+        them, validates the timestamp for replay prevention, validates the NHS
+        number where present, matches the patient to a stored streaming output
+        document, and renders the Viewer.
+      parameters:
+        - name: organisationId
+          in: query
+          required: true
+          description: >
+            Plaintext Trust identifier. Combined with `applicationId` and
+            `keyId` to select the correct decryption key and IV.
+          schema:
+            type: string
+          example: LINCS
+        - name: applicationId
+          in: query
+          required: true
+          description: >
+            Plaintext EPR application identifier. Combined with `organisationId`
+            and `keyId` to select the correct decryption key and IV.
+          schema:
+            type: string
+          example: S1_UEC
+        - name: keyId
+          in: query
+          required: true
+          description: >
+            Plaintext key version identifier. Combined with `organisationId`
+            and `applicationId` to select the correct decryption key and IV.
+          schema:
+            type: string
+          example: k1
+        - name: nhsNumber
+          in: query
+          required: false
+          description: >
+            AES-128 encrypted, base64 url-encoded NHS number (10 digits, no spaces).
+          schema:
+            type: string
+        - name: mrn
+          in: query
+          required: true
+          description: >
+            AES-128 encrypted, base64 url-encoded Medical Record Number assigned
+            by the Trust.
+          schema:
+            type: string
+        - name: familyName
+          in: query
+          required: true
+          description: AES-128 encrypted, base64url-encoded patient surname.
+          schema:
+            type: string
+        - name: dob
+          in: query
+          required: true
+          description: >
+            AES-128 encrypted, base64 url-encoded patient date of birth
+            (ISO 8601 YYYY-MM-DD).
+          schema:
+            type: string
+        - name: postcode
+          in: query
+          required: true
+          description: AES-128 encrypted, base64 url-encoded patient postcode.
+          schema:
+            type: string
+        - name: utcTimestamp
+          in: query
+          required: true
+          description: >
+            AES-128 encrypted, base64url-encoded UTC timestamp of the launch
+            event (ISO 8601). Used for replay prevention; requests with a
+            timestamp outside the server's acceptable window are rejected.
+          schema:
+            type: string
+        - name: username
+          in: query
+          required: true
+          description: >
+            AES-128 encrypted, base64url-encoded EPR username of the clinician
+            performing the launch. Recorded in the audit log.
+          schema:
+            type: string
+        - name: roleProfileId
+          in: query
+          required: true
+          description: >
+            AES-128 encrypted, base64url-encoded SystmOne role profile ID of
+            the clinician. Recorded in the audit log.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >
+            Successful launch. Returns the Viewer HTML page showing the most
+            recent streaming output document for the identified patient.
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          description: >
+            Malformed request. One or more required query parameters are absent
+            or the request cannot be processed.
+          content:
+            text/html:
+              schema:
+                type: string
+        '401':
+          description: >
+            Decryption failed, or the combination of `organisationId`,
+            `applicationId`, and `keyId` does not correspond to a configured
+            key. No patient data is returned.
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: >
+            Parameters decrypted and validated successfully, but no streaming
+            output documents are held for the identified patient.
+          content:
+            text/html:
+              schema:
+                type: string
+        '422':
+          description: >
+            Parameters decrypted successfully but failed validation — for
+            example, the timestamp is outside the replay-prevention window, or
+            the NHS number fails the Modulus 11 check.
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          description: Unexpected internal server error.
+          content:
+            text/html:
+              schema:
+                type: string
   /store/presentation:
     post:
       summary: Store presentation document
