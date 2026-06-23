@@ -411,4 +411,136 @@ paths:
                 properties:
                   error:
                     type: string
-
+  /admittance/admit:
+    post:
+      summary: Admit a patient
+      operationId: admitPatient
+      description: >
+        Records a new patient admission against the identified patient and
+        hospital. The admission is open until a corresponding terminate request
+        is received.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mrn
+                - hospital
+                - admissionTime
+              properties:
+                mrn:
+                  type: string
+                  description: Medical Record Number assigned by the Trust.
+                  example: "U34512345"
+                hospital:
+                  type: string
+                  description: Identifier of the admitting hospital.
+                  example: "Lincoln"
+                admissionTime:
+                  type: string
+                  format: date-time
+                  description: UTC date and time of admission (ISO 8601).
+                  example: "2026-06-23T09:15:00Z"
+      responses:
+        '201':
+          description: Admission recorded successfully.
+        '400':
+          description: Malformed request body or missing required fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: Hospital identifier is not recognised.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Unexpected internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /admittance/terminate:
+    put:
+      summary: Terminate a patient admission
+      operationId: terminateAdmission
+      description: >
+        Closes an open admission for the identified patient and hospital by
+        recording a termination time. Returns 409 if no active admission exists
+        for the given MRN and hospital.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mrn
+                - hospital
+                - terminationTime
+              properties:
+                mrn:
+                  type: string
+                  description: Medical Record Number assigned by the Trust.
+                  example: "U34512345"
+                hospital:
+                  type: string
+                  description: Identifier of the hospital where the admission was recorded.
+                  example: "Lincoln"
+                terminationTime:
+                  type: string
+                  format: date-time
+                  description: UTC date and time of discharge or termination (ISO 8601).
+                  example: "2026-06-23T17:45:00Z"
+      responses:
+        '201':
+          description: Admission terminated successfully.
+        '400':
+          description: Malformed request body or missing required fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: Hospital identifier is not recognised.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '409':
+          description: No active admission found for the given MRN and hospital.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Unexpected internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
