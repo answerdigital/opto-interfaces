@@ -506,7 +506,7 @@ paths:
                   description: UTC date and time of discharge or termination (ISO 8601).
                   example: "2026-06-23T17:45:00Z"
       responses:
-        '201':
+        '200':
           description: Admission terminated successfully.
         '400':
           description: Malformed request body or missing required fields.
